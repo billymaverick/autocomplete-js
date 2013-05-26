@@ -1,3 +1,14 @@
+/* IDE-style autocompletion for HTML textboxes */
+
+/*
+ * Helpers
+ */
+
+/* Add a startsWith method to the String class */
+String.prototype.startsWith = function(substring) {
+    return this.valueOf().lastIndexOf(substring, 0) === 0;
+}
+
 /* Get cursor position in textarea */
 function getCursorPosition(label) {
     var textArea = document.getElementById(label);
@@ -21,43 +32,51 @@ function getTextFromArea(label) {
 }
 
 /* 
- * The dictionary object. Interface matches my trie implementation, just in case 
+ * The autocomplete dictionary object 
  */
+
 function Dictionary() {
     this.words = [];
 }
-
-Dictionary.prototype.insert = function(words) {
-    for (var i = 0; i < words.length; i++) {
-        this.words.push(words[i]);
+/* Insert a word into the dictionary */
+Dictionary.prototype.insert = function(word) {
+    if (this.words.indexOf(word) == -1) {
+        this.words.push(word);
     }
 }
-
+/* Get all words starting with substring */
 Dictionary.prototype.wordsStartingWith = function(substring) {
     var matches = [];
     for (var i = 0; i < this.words.length; i++) {
         if (this.words[i].startsWith(substring)) {
-            matches.push(words[i]);
+            matches.push(this.words[i]);
         }
     }
     return matches;
 }
 
-/* Function to poll the textbox for latest input */
-function updateDictionary() {
-    return null;
-}
+/*
+ * Event handlers
+ */
 
-/* need this to run functions when page loads */
 $(document).ready(function() {
-    console.log('ready called');
-
-    $('#textbox').keyup(function() {
-        alert('keyup handler called'); // TODO write event handler to update dict
+    
+    $('#textbox').keyup(function(event) {
+        var text = $(this).val().trim();
+        
+        /* If spacebar is typed, save the last word typed for autocompletion. */
+        if (event.which == 32) {
+            var words = text.split(' ');
+            var last = words.pop();
+            dict.insert(last);
+        }
+        /* If a letter is typed, prompt for autocompletion. */
+        else {
+            var fragment = text.split(' ').pop();
+            var completions = dict.wordsStartingWith(fragment);
+        }
     });
 
-    $('#test').click(function() {
-        console.log('Pay arrrght!' + ' ' + crips);
-        crips ++;
-    });
 });
+
+var dict = new Dictionary();
