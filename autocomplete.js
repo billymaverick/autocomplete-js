@@ -31,6 +31,8 @@ function getTextFromArea(label) {
     return text;
 }
 
+// TODO insert at caret function, make selection cover insertion
+
 /* 
  * The autocomplete dictionary object 
  */
@@ -54,6 +56,14 @@ Dictionary.prototype.wordsStartingWith = function(substring) {
     }
     return matches;
 }
+/* Get all strings that complete substring TODO change so it doesn' loop twice */
+Dictionary.prototype.getCompletions = function(substring) {
+    var matches = this.wordsStartingWith(substring);
+    for (var i = 0; i < matches.length; i++) {
+        matches[i] = matches[i].substring(substring.length);
+    }
+    return matches;
+}
 
 /*
  * Event handlers
@@ -63,6 +73,7 @@ $(document).ready(function() {
     
     $('#textbox').keyup(function(event) {
         var text = $(this).val().trim();
+        var textbox = document.getElementById('textbox');
         
         /* If spacebar is typed, save the last word typed for autocompletion. */
         if (event.which == 32) {
@@ -73,8 +84,16 @@ $(document).ready(function() {
         /* If a letter is typed, prompt for autocompletion. */
         else {
             var fragment = text.split(' ').pop();
-            var completions = dict.wordsStartingWith(fragment);
+            var completions = dict.getCompletions(fragment);
+            if (completions.length > 0) {
+                textbox.value += completions[0];
+                textbox.selectionStart = textbox.textLength - completions[0].length;
+            }
         }
+    });
+
+    /* Button for testing functions */
+    $('#test').click(function(event) {
     });
 
 });
