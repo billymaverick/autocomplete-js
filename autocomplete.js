@@ -31,8 +31,6 @@ function getTextFromArea(label) {
     return text;
 }
 
-// TODO insert at caret function, make selection cover insertion
-
 /* 
  * The autocomplete dictionary object 
  */
@@ -70,30 +68,52 @@ Dictionary.prototype.getCompletions = function(substring) {
  */
 
 $(document).ready(function() {
+
+    //  BUG : Pressing backspace triggers completion so you can't delete words
     
     $('#textbox').keyup(function(event) {
         var text = $(this).val().trim();
         var textbox = document.getElementById('textbox');
+        var hasCompletion = false; // closure?, why can't I do the same with dict
+        var currentCompletions;
+        console.log(currentCompletions);
+        
+        //TODO use a switch/case statement here
         
         /* If spacebar is typed, save the last word typed for autocompletion. */
-        if (event.which == 32) {
+        if (event.which == 32) { // Spacebar
             var words = text.split(' ');
             var last = words.pop();
             dict.insert(last);
         }
-        /* If a letter is typed, prompt for autocompletion. */
+        else if (event.which == 9) { // Tab key
+            console.log('tab key pushed');
+            if (hasCompletion) {
+                // cycle through possible completions, with insertion function
+            }
+        }
+        /* If a letter is typed, prompt for autocompletion. 
+         * TODO Put insertion code in a separate function
+         */
         else {
             var fragment = text.split(' ').pop();
             var completions = dict.getCompletions(fragment);
             if (completions.length > 0) {
                 textbox.value += completions[0];
                 textbox.selectionStart = textbox.textLength - completions[0].length;
+                hasCompletion = true;
+                currentCompletions = completions;
+            }
+            else {
+                hasCompletion = false;
             }
         }
+        console.log(hasCompletion);
     });
 
     /* Button for testing functions */
     $('#test').click(function(event) {
+        console.log('Hi');
     });
 
 });
