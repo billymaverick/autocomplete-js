@@ -82,7 +82,8 @@ $(document).ready(function() {
                 }
                 console.log(dict);
                 console.log(currentcompletions);
-        };})()
+            };
+        })()
     );
 
     /* button for testing functions */
