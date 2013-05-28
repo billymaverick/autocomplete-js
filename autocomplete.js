@@ -9,26 +9,10 @@ String.prototype.startsWith = function(substring) {
     return this.valueOf().lastIndexOf(substring, 0) === 0;
 }
 
-/* Get cursor position in textarea */
-function getCursorPosition(label) {
-    var textArea = document.getElementById(label);
-    var position = textArea.selectionStart;
-    return position;
-}
-
-/* Get selection start and end position in textarea */
-function getSelectionRange(label) {
-    var textArea = document.getElementById(label);
-    var range = {start: textArea.selectionStart, end: textArea.selectionEnd};
-    console.log(range);
-    return range;
-}
-
-/* Get all text from textbox */
-function getTextFromArea(label) {
-    var textArea = document.getElementById(label);
-    var text = textArea.value;
-    return text;
+/* Method to insert completions into textbox */
+function insertCompletion(textbox, completion) {
+    textbox.value += completion;
+    textbox.selectionStart = textbox.textlength - completion.length;
 }
 
 /* 
@@ -69,53 +53,51 @@ Dictionary.prototype.getCompletions = function(substring) {
 
 $(document).ready(function() {
 
-    //  BUG : Pressing backspace triggers completion so you can't delete words
-    
-    $('#textbox').keyup(function(event) {
-        var text = $(this).val().trim();
-        var textbox = document.getElementById('textbox');
-        var hasCompletion = false; // closure?, why can't I do the same with dict
-        var currentCompletions;
-        console.log(currentCompletions);
-        
-        //TODO use a switch/case statement here
-        
-        /* If spacebar is typed, save the last word typed for autocompletion. */
-        if (event.which == 32) { // Spacebar
-            var words = text.split(' ');
-            var last = words.pop();
-            dict.insert(last);
-        }
-        else if (event.which == 9) { // Tab key
-            console.log('tab key pushed');
-            if (hasCompletion) {
-                // cycle through possible completions, with insertion function
-            }
-        }
-        /* If a letter is typed, prompt for autocompletion. 
-         * TODO Put insertion code in a separate function
-         */
-        else {
-            var fragment = text.split(' ').pop();
-            var completions = dict.getCompletions(fragment);
-            if (completions.length > 0) {
-                textbox.value += completions[0];
-                textbox.selectionStart = textbox.textLength - completions[0].length;
-                hasCompletion = true;
-                currentCompletions = completions;
-            }
-            else {
-                hasCompletion = false;
-            }
-        }
-        console.log(hasCompletion);
-    });
+    /*
+     * New event handler using closure to preserve state between calls
+     */
+    $('#textbox2').keyup( 
+        (function () {
+            var dict = new Dictionary();
+            var box = $('#textbox2');
+            var currentcompletions = []; // this could be another closure...
+            var i = 0;
 
-    /* Button for testing functions */
-    $('#test').click(function(event) {
-        console.log('Hi');
-    });
+            return function (event) {
+                var text = box.val().trim();
+
+                if (event.which == 32) { // todo put keycodes into object
+                    var last = text.split(' ').pop();
+                    dict.insert(last);
+                }
+                else if (event.which == 35) { // Cycle through completion indices
+                    i++; // Need to reset this to cycle through >> def make it a closure
+                }
+                else {
+                    var fragment = text.split(' ').pop();
+                    currentcompletions = dict.getCompletions(fragment);
+                    if (currentcompletions[i]) {
+                        insertCompletion(box, currentcompletions[i]);
+                    }
+                }
+                console.log(dict);
+                console.log(currentcompletions);
+        };})()
+    );
+
+    /* button for testing functions */
+    $('#test').click( 
+            (function (event) {
+                var count = 0;
+                return function() { 
+                    alert(count);
+                    count ++;
+                };
+            })()
+    ); // execute on creation
 
 });
+
+// testing if i can define the handler somewhere else
 
 var dict = new Dictionary();
