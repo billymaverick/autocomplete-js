@@ -59,7 +59,7 @@ $(document).ready(function() {
     $('#textbox2').keyup( 
         (function () {
             var dict = new Dictionary();
-            var box = $('#textbox2');
+            var box = document.getElementById('textbox2');
             var currentcompletions = []; // this could be another closure...
             var i = 0;
 
