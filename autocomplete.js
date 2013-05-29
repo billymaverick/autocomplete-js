@@ -12,7 +12,8 @@ String.prototype.startsWith = function(substring) {
 /* Method to insert completions into textbox */
 function insertCompletion(textbox, completion) {
     textbox.value += completion;
-    textbox.selectionStart = textbox.textlength - completion.length;
+    textbox.selectionStart = textbox.textLength - completion.length;
+    console.log(textbox.textLength, completion.length);
 }
 
 /* 
@@ -64,9 +65,9 @@ $(document).ready(function() {
             var i = 0;
 
             return function (event) {
-                var text = box.val().trim();
+                var text = box.value.trim();
 
-                if (event.which == 32) { // todo put keycodes into object
+                if (event.which == 32) { // TODO put keycodes into object
                     var last = text.split(' ').pop();
                     dict.insert(last);
                 }
@@ -87,18 +88,17 @@ $(document).ready(function() {
     );
 
     /* button for testing functions */
-    $('#test').click( 
-            (function (event) {
-                var count = 0;
-                return function() { 
-                    alert(count);
-                    count ++;
-                };
-            })()
-    ); // execute on creation
+    $('#test').click(closure()); // execute on creation
 
 });
 
 // testing if i can define the handler somewhere else
+var closure = (function () {
+    var count = 0;
+    return function (event) {
+        alert(count);
+        count ++;
+    };
+});
 
 var dict = new Dictionary();
