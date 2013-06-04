@@ -16,6 +16,10 @@ function insertCompletion(textbox, completion) {
     console.log(textbox.textLength, completion.length);
 }
 
+function goToEnd(textbox) {
+    textbox.selectionStart = textbox.textLength;
+}
+
 /* 
  * The autocomplete dictionary object 
  */
@@ -57,33 +61,43 @@ $(document).ready(function() {
     /*
      * New event handler using closure to preserve state between calls
      */
-    $('#textbox2').keyup( 
+    $('#textbox').on('keydown keyup',
         (function () {
-            var dict = new Dictionary();
-            var box = document.getElementById('textbox2');
-            var currentcompletions = []; // this could be another closure...
-            var i = 0;
+            var dict = new Dictionary;
+            var textbox = document.getElementById('textbox');
+            var completions = [];
+            var current = 0;
 
-            return function (event) {
-                var text = box.value.trim();
+            return function (e) {
+                var text = textbox.value.trim();
 
-                if (event.which == 32) { // TODO put keycodes into object
-                    var last = text.split(' ').pop();
-                    dict.insert(last);
-                }
-                else if (event.which == 35) { // Cycle through completion indices
-                    i++; // Need to reset this to cycle through >> def make it a closure
-                }
-                else {
-                    var fragment = text.split(' ').pop();
-                    currentcompletions = dict.getCompletions(fragment);
-                    if (currentcompletions[i]) {
-                        insertCompletion(box, currentcompletions[i]);
+                if (e.type == 'keydown') {
+                    if (e.which == 13 && completions.length > 0) { // Enter
+                        goToEnd(textbox);                        
+                        e.preventDefault(); // JQuery
+                        completions = [];
                     }
                 }
-                console.log(dict);
-                console.log(currentcompletions);
-            };
+
+                if (e.type == 'keyup') {
+                    if (e.which == 32 || e.which == 13) { // Space or enter
+                        var last = text.split(/\s|\n/).pop();
+                        dict.insert(last);
+                        completions = [];
+                    }
+                    else { // Anything else
+                        console.log('Fill branch called');
+                        var fragment = text.split(/\s|\n/).pop();
+                        completions = dict.getCompletions(fragment);
+                        if (completions[current]) {
+                            insertCompletion(textbox, completions[current]);
+                        }
+                    }
+                }
+                console.log(e);
+                console.log(dict.words);
+                console.log(completions);
+            }
         })()
     );
 
