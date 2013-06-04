@@ -77,6 +77,11 @@ $(document).ready(function() {
                         e.preventDefault(); // JQuery
                         completions = [];
                     }
+                    
+                    if (e.which == 9 && completions.length > 0) { // Tab
+                        current ++;
+                        insertCompletion(textbox, completions[current]);
+                    }
                 }
 
                 if (e.type == 'keyup') {
@@ -85,7 +90,7 @@ $(document).ready(function() {
                         dict.insert(last);
                         completions = [];
                     }
-                    else { // Anything else
+                    else if (e.which != 8) { // Backspace
                         console.log('Fill branch called');
                         var fragment = text.split(/\s|\n/).pop();
                         completions = dict.getCompletions(fragment);
